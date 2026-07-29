@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Eden 的个人商务网站：筋膜康复、身体侦探、系统问题解决。">
+  <title>Eden｜身体侦探</title>
+  <style>
+    :root {
+      --paper: #f5f6f3;
+      --bright: #fbfcfa;
+      --ink: #101412;
+      --soft: #4d5651;
+      --forest: #0b2b24;
+      --signal: #c64b3d;
+      --mist: #dfe5e0;
+      --line: rgba(16, 20, 18, .14);
+      --white-line: rgba(255, 255, 255, .18);
+      --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --utility: "SFMono-Regular", "Roboto Mono", "Cascadia Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--body);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: var(--signal); color: #fff; }
+
+    .site-header {
+      position: fixed;
+      z-index: 50;
+      top: 18px;
+      left: 50%;
+      width: min(1180px, calc(100% - 40px));
+      height: 64px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 10px 0 18px;
+      border: 1px solid rgba(255,255,255,.46);
+      border-radius: 18px;
+      background: rgba(245,246,243,.82);
+      box-shadow: 0 8px 40px rgba(9,30,25,.08);
+      backdrop-filter: blur(20px) saturate(140%);
+      transform: translateX(-50%);
+    }
+    .wordmark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      font-size: 16px;
+      font-weight: 650;
+      letter-spacing: -.02em;
+    }
+    .wordmark-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--forest);
+      color: #fff;
+      font: 13px var(--utility);
+    }
+    .wordmark small {
+      display: block;
+      margin-top: 1px;
+      color: var(--soft);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: .16em;
+    }
+    .site-header nav { display: flex; gap: 34px; color: var(--soft); font-size: 13px; }
+    .site-header nav a { transition: color .18s ease; }
+    .site-header nav a:hover { color: var(--signal); }
+    .header-cta {
+      justify-self: end;
+      padding: 13px 20px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 13px;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .header-cta:hover { background: var(--forest); transform: translateY(-1px); }
+
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: minmax(0,1.04fr) minmax(420px,.96fr);
+      align-items: center;
+      gap: 5vw;
+      padding: 150px max(6vw,40px) 80px;
+      overflow: hidden;
+      background: radial-gradient(circle at 13% 75%, rgba(11,43,36,.08), transparent 31%), var(--bright);
+    }
+    .hero-copy { position: relative; z-index: 2; }
+    .eyebrow, .section-kicker {
+      margin: 0 0 30px;
+      color: var(--signal);
+      font: 650 11px var(--utility);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: clamp(64px,7.4vw,126px);
+      font-weight: 650;
+      letter-spacing: -.075em;
+      line-height: .93;
+    }
+    .hero h1 em { position: relative; color: var(--forest); font-style: normal; }
+    .hero h1 em::after {
+      content: "";
+      position: absolute;
+      right: .02em;
+      bottom: -.07em;
+      left: .04em;
+      height: .035em;
+      border-radius: 99px;
+      background: var(--signal);
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: draw-line .9s .58s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    .hero-lead {
+      max-width: 590px;
+      margin: 42px 0 0;
+      color: var(--soft);
+      font-size: clamp(17px,1.35vw,22px);
+      line-height: 1.75;
+    }
+    .hero-actions { display: flex; align-items: center; gap: 32px; margin-top: 38px; }
+    .button {
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 620;
+    }
+    .button-primary {
+      padding: 0 24px;
+      border-radius: 14px;
+      background: var(--forest);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(11,43,36,.16);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .button-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(11,43,36,.24); }
+    .button-text { gap: 9px; color: var(--soft); }
+
+    .diagnostic-field {
+      position: relative;
+      width: min(42vw,630px);
+      aspect-ratio: 1;
+      justify-self: center;
+      border: 1px solid rgba(11,43,36,.13);
+      border-radius: 50%;
+      background: rgba(223,229,224,.35);
+      box-shadow: inset 0 0 80px rgba(255,255,255,.78);
+    }
+    .field-grid {
+      position: absolute;
+      inset: 8%;
+      border: 1px solid rgba(11,43,36,.09);
+      border-radius: 50%;
+      background-image: linear-gradient(rgba(11,43,36,.06) 1px,transparent 1px), linear-gradient(90deg,rgba(11,43,36,.06) 1px,transparent 1px);
+      background-size: 10% 10%;
+      -webkit-mask-image: radial-gradient(circle,#000 0 62%,transparent 78%);
+      mask-image: radial-gradient(circle,#000 0 62%,transparent 78%);
+    }
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px solid rgba(11,43,36,.22);
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+    }
+    .orbit-outer { width: 74%; height: 74%; }
+    .orbit-middle { width: 49%; height: 49%; border-style: dashed; }
+    .orbit-inner { width: 23%; height: 23%; background: rgba(255,255,255,.45); }
+    .force-axis {
+      position: absolute;
+      top: 9%;
+      bottom: 9%;
+      left: 50%;
+      width: 1px;
+      background: linear-gradient(transparent,var(--signal) 15% 85%,transparent);
+    }
+    .force-axis::before, .force-axis::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: 7px;
+      height: 7px;
+      border: 2px solid var(--signal);
+      border-radius: 50%;
+      background: var(--bright);
+      transform: translateX(-50%);
+    }
+    .force-axis::before { top: 12%; }
+    .force-axis::after { bottom: 12%; }
+    .signal-dot {
+      position: absolute;
+      top: 14%;
+      left: 50%;
+      width: 11px;
+      height: 11px;
+      border: 3px solid var(--bright);
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 0 1px var(--signal), 0 5px 18px rgba(198,75,61,.35);
+      transform: translate(-50%,-50%);
+      animation: trace-axis 5s ease-in-out infinite;
+    }
+    .core {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 23%;
+      height: 23%;
+      display: grid;
+      place-content: center;
+      gap: 5px;
+      text-align: center;
+      transform: translate(-50%,-50%);
+    }
+    .core span { color: var(--forest); font-size: clamp(12px,1vw,16px); font-weight: 680; }
+    .core strong { color: var(--signal); font: 10px var(--utility); letter-spacing: .16em; }
+    .field-label {
+      position: absolute;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(251,252,250,.78);
+      color: var(--forest);
+      font: 8px var(--utility);
+      letter-spacing: .07em;
+      backdrop-filter: blur(6px);
+    }
+    .label-observe { top: 19%; left: 5%; }
+    .label-reason { top: 17%; right: 2%; }
+    .label-verify { right: 4%; bottom: 22%; }
+    .field-caption { position: absolute; bottom: 14%; left: 6%; margin: 0; color: var(--soft); font-size: 11px; line-height: 1.6; }
+
+    .section-shell { padding: 150px max(7vw,40px); }
+    .thesis { background: var(--forest); color: #fff; }
+    .thesis .section-kicker, .connect .section-kicker { color: #e98473; }
+    .thesis blockquote {
+      max-width: 1200px;
+      margin: 0;
+      font-family: var(--display);
+      font-size: clamp(42px,6vw,94px);
+      font-weight: 590;
+      letter-spacing: -.065em;
+      line-height: 1.12;
+    }
+    .thesis blockquote span { color: rgba(255,255,255,.46); }
+    .thesis-notes {
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 8vw;
+      margin: 90px 0 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid var(--white-line);
+      color: rgba(255,255,255,.67);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .thesis-notes p { margin: 0; }
+
+    .approach { display: grid; grid-template-columns: .85fr 1.15fr; gap: 11vw; background: var(--bright); }
+    .section-heading { max-width: 560px; }
+    .section-heading h2, .case-copy h2, .profile h2, .connect h2 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: clamp(46px,5.3vw,82px);
+      font-weight: 620;
+      letter-spacing: -.065em;
+      line-height: 1.05;
+    }
+    .section-heading > p:last-child { margin: 32px 0 0; color: var(--soft); font-size: 16px; line-height: 1.8; }
+    .method-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+    .method-list li { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 28px 0 32px; border-bottom: 1px solid var(--line); }
+    .method-index { padding-top: 5px; color: var(--signal); font: 10px var(--utility); letter-spacing: .12em; }
+    .method-list h3 { margin: 0; font: 620 25px var(--display); letter-spacing: -.03em; }
+    .method-list p { max-width: 560px; margin: 10px 0 0; color: var(--soft); font-size: 14px; line-height: 1.75; }
+
+    .case-section { min-height: 900px; display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1.05fr); background: var(--mist); }
+    .case-image { min-height: 850px; overflow: hidden; background: var(--ink); }
+    .case-image a { position: relative; width: 100%; height: 100%; display: block; }
+    .case-image img { width: 100%; height: 100%; object-fit: cover; object-position: center 48%; filter: saturate(.82) contrast(1.04); transition: transform .6s cubic-bezier(.2,.7,.2,1), filter .3s ease; }
+    .case-image a:hover img { filter: saturate(.98) contrast(1.02); transform: scale(1.018); }
+    .case-image a > span {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 10px;
+      background: rgba(8,20,16,.58);
+      color: #fff;
+      font-size: 11px;
+      backdrop-filter: blur(12px);
+    }
+    .case-copy { align-self: center; padding: 100px clamp(40px,8vw,130px); }
+    .case-lead { max-width: 560px; margin: 36px 0 0; color: var(--soft); font-size: 18px; line-height: 1.8; }
+    .case-insight { max-width: 580px; display: grid; grid-template-columns: 90px 1fr; gap: 28px; margin-top: 62px; padding-top: 24px; border-top: 1px solid var(--line); }
+    .case-insight span { color: var(--signal); font: 9px var(--utility); letter-spacing: .1em; }
+    .case-insight p, .case-disclaimer { margin: 0; color: var(--soft); font-size: 14px; line-height: 1.8; }
+    .case-disclaimer { margin-top: 32px; font-size: 11px; opacity: .75; }
+
+    .profile { display: grid; grid-template-columns: .9fr 1.1fr; gap: 12vw; background: var(--bright); }
+    .profile-copy { max-width: 620px; padding-top: 58px; }
+    .profile-copy > p { margin: 0 0 24px; color: var(--soft); font-size: 16px; line-height: 1.9; }
+    .profile-copy .profile-intro { color: var(--ink); font-size: 24px; font-weight: 560; letter-spacing: -.025em; line-height: 1.55; }
+    .identity-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 44px; }
+    .identity-tags span { padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--forest); font: 9px var(--utility); letter-spacing: .06em; }
+
+    .collaboration { background: #e8ece8; }
+    .collaboration-heading { max-width: 760px; }
+    .collaboration-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-top: 76px; }
+    .collaboration-grid article { min-height: 320px; display: flex; flex-direction: column; padding: 28px; border: 1px solid rgba(11,43,36,.11); border-radius: 24px; background: rgba(251,252,250,.64); transition: background .2s ease, transform .2s ease; }
+    .collaboration-grid article:hover { background: var(--bright); transform: translateY(-4px); }
+    .collaboration-grid article > span { color: var(--signal); font: 9px var(--utility); letter-spacing: .12em; }
+    .collaboration-grid h3 { margin: auto 0 16px; font: 620 29px var(--display); letter-spacing: -.04em; }
+    .collaboration-grid p { margin: 0; color: var(--soft); font-size: 13px; line-height: 1.75; }
+
+    .connect { background: var(--ink); color: #fff; }
+    .connect h2 { max-width: 980px; font-size: clamp(54px,7vw,110px); }
+    .connect-lead { max-width: 650px; margin: 44px 0 0; color: rgba(255,255,255,.57); font-size: 17px; line-height: 1.85; }
+    .connect-actions { display: flex; align-items: center; gap: 26px; margin-top: 42px; }
+    .button-light { padding: 0 24px; border-radius: 14px; background: #fff; color: var(--ink); }
+    .connect-actions p { margin: 0; color: rgba(255,255,255,.45); font-size: 12px; }
+    .contact-brief { max-width: 850px; display: grid; grid-template-columns: 150px 1fr; gap: 30px; margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--white-line); }
+    .contact-brief span { color: #e98473; font: 9px var(--utility); letter-spacing: .1em; }
+    .contact-brief p { margin: 0; color: rgba(255,255,255,.68); font-size: 14px; line-height: 1.8; }
+
+    footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 30px max(4vw,24px); border-top: 1px solid rgba(255,255,255,.1); background: var(--ink); color: rgba(255,255,255,.46); font-size: 10px; }
+    .footer-wordmark { color: #fff; }
+    footer .wordmark-mark { background: #fff; color: var(--ink); }
+    footer p { margin: 0; }
+    footer p:last-child { justify-self: end; }
+    a:focus-visible { outline: 3px solid rgba(198,75,61,.4); outline-offset: 4px; }
+
+    @keyframes trace-axis { 0%,100% { top: 14%; } 50% { top: 86%; } }
+    @keyframes draw-line { to { transform: scaleX(1); } }
+
+    @media (max-width: 1000px) {
+      .hero { grid-template-columns: 1fr .78fr; gap: 2vw; }
+      .diagnostic-field { width: min(44vw,500px); }
+      .approach, .profile { gap: 7vw; }
+      .case-copy { padding: 80px 48px; }
+    }
+
+    @media (max-width: 780px) {
+      .site-header { top: 10px; width: calc(100% - 20px); height: 58px; grid-template-columns: 1fr auto; padding-left: 12px; border-radius: 16px; }
+      .site-header nav { display: none; }
+      .wordmark-mark { width: 30px; height: 30px; }
+      .header-cta { padding: 11px 15px; }
+      .hero { min-height: auto; grid-template-columns: 1fr; padding: 124px 22px 70px; }
+      .hero h1 { font-size: clamp(58px,19vw,86px); }
+      .hero-lead br { display: none; }
+      .hero-actions { gap: 20px; }
+      .diagnostic-field { width: min(96vw,520px); margin: 48px 0 0; }
+      .section-shell { padding: 96px 22px; }
+      .thesis blockquote { font-size: clamp(39px,12vw,60px); }
+      .thesis-notes { grid-template-columns: 1fr; gap: 24px; margin-top: 64px; }
+      .approach, .profile { grid-template-columns: 1fr; gap: 64px; }
+      .section-heading h2, .case-copy h2, .profile h2, .connect h2 { font-size: clamp(43px,13vw,68px); }
+      .case-section { min-height: auto; grid-template-columns: 1fr; }
+      .case-image { height: 74svh; min-height: 590px; }
+      .case-copy { padding: 88px 22px; }
+      .profile-copy { padding-top: 0; }
+      .collaboration-grid { grid-template-columns: 1fr; margin-top: 50px; }
+      .collaboration-grid article { min-height: 250px; }
+      .connect-actions { align-items: flex-start; flex-direction: column; }
+      .contact-brief { grid-template-columns: 1fr; gap: 14px; }
+      footer { grid-template-columns: 1fr auto; gap: 24px; }
+      footer p:nth-of-type(1) { justify-self: end; }
+      footer p:last-child { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="返回首页">
+        <span class="wordmark-mark" aria-hidden="true">E</span>
+        <span>Eden<small>源身心</small></span>
+      </a>
+      <nav aria-label="主导航">
+        <a href="#approach">方法</a>
+        <a href="#case">案例</a>
+        <a href="#collaboration">合作</a>
+      </nav>
+      <a class="header-cta" href="#connect">发起连接</a>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">EDEN · GUANGZHOU · 近十年专业实践</p>
+        <h1>看见身体，<br>如何成为<br><em>一个整体。</em></h1>
+        <p class="hero-lead">筋膜康复师、身体侦探、系统问题解决者。<br>从表面症状背后，寻找真正值得解决的矛盾。</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#approach">了解我的方法</a>
+          <a class="button button-text" href="#collaboration">商务合作 <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="diagnostic-field" aria-label="由观察、推理和验证组成的系统诊断示意">
+        <div class="field-grid" aria-hidden="true"></div>
+        <div class="orbit orbit-outer" aria-hidden="true"></div>
+        <div class="orbit orbit-middle" aria-hidden="true"></div>
+        <div class="orbit orbit-inner" aria-hidden="true"></div>
+        <div class="force-axis" aria-hidden="true"><span class="signal-dot"></span></div>
+        <span class="field-label label-observe">观察 / OBSERVE</span>
+        <span class="field-label label-reason">推理 / REASON</span>
+        <span class="field-label label-verify">验证 / VERIFY</span>
+        <div class="core"><span>最大矛盾</span><strong>01</strong></div>
+        <p class="field-caption">不从答案出发<br>从真实反馈出发</p>
+      </div>
+    </section>
+
+    <section class="thesis section-shell">
+      <p class="section-kicker">我的判断</p>
+      <blockquote>人体不是可以简单套用公式的机器。<br><span>真正有效的工作，从尊重每一个人的独特性开始。</span></blockquote>
+      <div class="thesis-notes">
+        <p>疼痛出现的地方，不一定是问题开始的地方。局部的变化，可能来自更长的身体链路。</p>
+        <p>因此，我更关心整体如何支撑、力量如何传导，以及什么反馈能验证判断。</p>
+      </div>
+    </section>
+
+    <section class="approach section-shell" id="approach">
+      <div class="section-heading">
+        <p class="section-kicker">工作方法</p>
+        <h2>像侦探一样，<br>还原身体的线索。</h2>
+        <p>这是一个有顺序的判断过程。每一步都为下一步提供信息，也随时接受真实反馈的修正。</p>
+      </div>
+      <ol class="method-list">
+        <li><span class="method-index">01</span><div><h3>观察整体</h3><p>不被疼痛出现的位置牵着走，先看体态、支撑与全身力线。</p></div></li>
+        <li><span class="method-index">02</span><div><h3>定位矛盾</h3><p>从变化最明显的地方切入，判断主要问题与代偿反应。</p></div></li>
+        <li><span class="method-index">03</span><div><h3>建立推理</h3><p>把问诊、既往经历与身体反馈连成一条可解释的因果链。</p></div></li>
+        <li><span class="method-index">04</span><div><h3>反馈验证</h3><p>用实际变化检查判断，持续修正，而不是把固定公式套给每个人。</p></div></li>
+      </ol>
+    </section>
+
+    <section class="case-section" id="case">
+      <div class="case-image">
+        <a href="ballet-posture-case.jpg" target="_blank" aria-label="查看完整芭蕾舞体态案例封面">
+          <img src="ballet-posture-case.jpg" alt="芭蕾舞体态案例封面，Eden 分析同一动作两侧表现差异">
+          <span>查看完整案例 ↗</span>
+        </a>
+      </div>
+      <div class="case-copy">
+        <p class="section-kicker">案例切片</p>
+        <h2>同一个动作，<br>为什么两边差这么多？</h2>
+        <p class="case-lead">表面看，是动作完成度不同。继续往下看，问题可能来自支撑、力线与身体调用方式的差异。</p>
+        <div class="case-insight">
+          <span>观察重点</span>
+          <p>不先要求身体“更努力”，而是先理解它正在如何发力、哪里出现代偿，以及真正的限制来自哪里。</p>
+        </div>
+        <p class="case-disclaimer">此处展示的是分析思路，不构成对任何个体的诊断或疗效承诺。</p>
+      </div>
+    </section>
+
+    <section class="profile section-shell">
+      <div class="profile-title">
+        <p class="section-kicker">关于 Eden</p>
+        <h2>理性很锋利，<br>但不是冷的。</h2>
+      </div>
+      <div class="profile-copy">
+        <p class="profile-intro">我的底色是研究者：爱追问、爱拆解，也愿意让判断接受验证。</p>
+        <p>我重视效率，但真正的效率从来不只是快。它也包括真实的沟通、清楚的边界，以及让彼此真正理解问题。</p>
+        <p>近十年的专业实践，让我越来越确认：复杂问题值得被认真对待，而专业价值应该通过结果、证据与长期信任被看见。</p>
+        <div class="identity-tags" aria-label="Eden 的个人标签">
+          <span>ENTP</span><span>系统思维</span><span>真实直接</span><span>长期主义</span><span>持续进化</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="collaboration section-shell" id="collaboration">
+      <div class="section-heading collaboration-heading">
+        <p class="section-kicker">商务合作</p>
+        <h2>适合一起做的事。</h2>
+        <p>我更期待目标清楚、彼此真诚、能够共同创造真实价值的合作。</p>
+      </div>
+      <div class="collaboration-grid">
+        <article><span>复杂案例</span><h3>疑难问题研讨</h3><p>围绕长期、复杂或常规路径难以解释的问题，共同梳理信息与判断框架。</p></article>
+        <article><span>专业表达</span><h3>内容与访谈合作</h3><p>把专业逻辑翻译成普通人能理解、又不牺牲准确性的内容。</p></article>
+        <article><span>行业连接</span><h3>体系与项目共创</h3><p>面向康复从业者、品牌与跨专业团队，探索评估、教育和服务的新路径。</p></article>
+      </div>
+    </section>
+
+    <section class="connect section-shell" id="connect">
+      <p class="section-kicker">开始连接</p>
+      <h2>如果问题足够真实，<br>我们就值得聊聊。</h2>
+      <p class="connect-lead">为了让沟通更有效，请先简单说明你是谁、希望解决什么、期待怎样的合作结果，以及大致时间计划。</p>
+      <div class="connect-actions">
+        <a class="button button-light" href="#contact-brief">查看合作沟通清单</a>
+        <p>目前请通过你获得本网站的原沟通渠道联系 Eden。</p>
+      </div>
+      <div class="contact-brief" id="contact-brief">
+        <span>合作沟通清单</span>
+        <p>你的身份 / 项目背景 / 核心问题 / 期望结果 / 时间与合作方式</p>
+      </div>
+    </section>
+
+    <footer>
+      <a class="wordmark footer-wordmark" href="#top"><span class="wordmark-mark" aria-hidden="true">E</span><span>Eden</span></a>
+      <p>源身心 · 广州</p>
+      <p>© 2026 Eden. 保留所有权利。</p>
+    </footer>
+  </main>
+</body>
+</html>
