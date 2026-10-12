@@ -1,0 +1,153 @@
+# Draft reviewed against pinned official sources. Not executed yet.
+# Only public upstream source and one public upstream test are downloaded.
+name: FEBio public contact smoke test
+
+on:
+  push:
+    branches:
+      - febio-public-smoke-20261012
+    paths:
+      - .github/workflows/febio-public-smoke.yml
+
+# No repository checkout, secrets, deployment, or write token is needed.
+permissions: {}
+
+concurrency:
+  group: febio-public-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  public-contact-test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      FEBIO_COMMIT: 32ae206ff4881dfb54f62296cd1558e58ed9fcc6
+      TESTSUITE_COMMIT: a6fd1d0372dbbb9afc7e84a0538b001c7b1cc0f7
+      SAMPLE_SHA256: 989aee645b1165c4d61b934673e75913427f01cab97bc4496a59b17ed22c9183
+      OMP_NUM_THREADS: '2'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check available build tools
+        run: |
+          set -euo pipefail
+          git --version
+          cmake --version
+          g++ --version
+          make --version
+          curl --version
+          python3 --version
+          df -h "$RUNNER_TEMP"
+          free -h
+
+      - name: Fetch pinned official FEBio source
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          SOURCE="$RUNNER_TEMP/febio-source"
+          git init --quiet "$SOURCE"
+          git -C "$SOURCE" fetch --depth=1 https://github.com/febiosoftware/FEBio.git "$FEBIO_COMMIT"
+          git -C "$SOURCE" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$SOURCE" rev-parse HEAD)" = "$FEBIO_COMMIT"
+          echo "FEBio source commit: $FEBIO_COMMIT"
+          echo "Official source license: MIT (retained in source/LICENSE)"
+          test -s "$SOURCE/LICENSE"
+
+      - name: Configure minimal CPU solver without MKL
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          cmake -S "$RUNNER_TEMP/febio-source" -B "$RUNNER_TEMP/febio-build" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DUSE_STATIC_STDLIBS=OFF \
+            -DUSE_MKL=OFF \
+            -DUSE_PDL=OFF \
+            -DUSE_HYPRE=OFF \
+            -DUSE_SUPERLU_MT=OFF \
+            -DUSE_MMG=OFF \
+            -DUSE_LEVMAR=OFF \
+            -DUSE_NLOPT=OFF \
+            -DUSE_FFTW=OFF \
+            -DUSE_ZLIB=OFF
+
+      - name: Build FEBio
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          cmake --build "$RUNNER_TEMP/febio-build" --parallel 2 --target febio4
+          test -x "$RUNNER_TEMP/febio-build/bin/febio4"
+          ldd "$RUNNER_TEMP/febio-build/bin/febio4"
+
+      - name: Fetch and inspect the pinned public contact sample
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          RESULTS="$RUNNER_TEMP/febio-results"
+          mkdir -p "$RESULTS"
+          curl --fail --location --retry 2 --proto '=https' --tlsv1.2 \
+            "https://raw.githubusercontent.com/febiosoftware/TestSuite/$TESTSUITE_COMMIT/Verify/co01.feb" \
+            --output "$RESULTS/co01.feb"
+          echo "$SAMPLE_SHA256  $RESULTS/co01.feb" | sha256sum --check
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import xml.etree.ElementTree as ET
+          path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'febio-results/co01.feb'
+          root = ET.parse(path).getroot()
+          assert root.tag == 'febio_spec'
+          assert root.find('Module').get('type') == 'solid'
+          assert len(root.findall('.//Nodes/node')) == 16
+          assert len(root.findall('.//Elements/elem')) == 2
+          assert root.find('.//contact').get('type') == 'sliding-facet-on-facet'
+          print('Verified public test structure: 16 nodes, 2 hex8 elements, solid contact.')
+          print('Public source: febiosoftware/TestSuite/Verify/co01.feb')
+          print('TestSuite has no declared repository license; input is fetched, not republished.')
+          PY
+
+      - name: Run the official two-element contact test
+        id: sample
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          RESULTS="$RUNNER_TEMP/febio-results"
+          cd "$RESULTS"
+          timeout --signal=TERM --kill-after=10s 120s \
+            "$RUNNER_TEMP/febio-build/bin/febio4" \
+            -i co01.feb -o co01.log -p co01.xplt -noconfig -nosplash \
+            2>&1 | tee console.log
+          test -s co01.log
+          test -s co01.xplt
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('co01.log').read_text(errors='replace')
+          compact = ''.join(text.split()).upper()
+          assert 'NORMALTERMINATION' in compact, 'Normal termination marker is missing'
+          assert 'ERRORTERMINATION' not in compact, 'Error termination marker is present'
+          print('PASS: solver terminated normally and produced a nonempty plot file.')
+          print('This is an installation/contact smoke test, not quantitative model validation.')
+          PY
+          sha256sum co01.log co01.xplt
+          wc -c co01.log co01.xplt
+
+      - name: Report result without uploading billable artifacts
+        if: always()
+        env:
+          SAMPLE_OUTCOME: ${{ steps.sample.outcome }}
+        run: |
+          set -euo pipefail
+          {
+            echo '## FEBio public contact smoke test'
+            echo "Run step outcome: $SAMPLE_OUTCOME"
+            echo "FEBio source: https://github.com/febiosoftware/FEBio/commit/$FEBIO_COMMIT"
+            echo "Sample source: https://github.com/febiosoftware/TestSuite/blob/$TESTSUITE_COMMIT/Verify/co01.feb"
+            echo 'Build: CPU-only minimal source build; no MKL or external solver libraries.'
+            echo 'Scope: official public sample only; no user repository files were checked out.'
+            echo 'Success means executable build, normal termination, and nonempty output; it does not establish physical accuracy or full-model readiness.'
+            echo 'No artifact upload, cache upload, deployment, or package publication was performed.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          LOG="$RUNNER_TEMP/febio-results/co01.log"
+          if [ -f "$LOG" ]; then
+            echo 'Final solver log lines:'
+            tail -n 80 "$LOG"
+          fi
