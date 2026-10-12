@@ -60,6 +60,8 @@ jobs:
           set -euo pipefail
           cmake -S "$RUNNER_TEMP/febio-source" -B "$RUNNER_TEMP/febio-build" \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXE_LINKER_FLAGS=-fopenmp \
+            -DCMAKE_SHARED_LINKER_FLAGS=-fopenmp \
             -DUSE_STATIC_STDLIBS=OFF \
             -DUSE_MKL=OFF \
             -DUSE_PDL=OFF \
